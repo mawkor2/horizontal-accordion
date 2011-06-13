@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html dir="ltr">
+    
+    <head>
+        <style type="text/css">
+            body, html { font-family:helvetica,arial,sans-serif; font-size:90%; }
+            #accordion-h h4 {
+              margin: 0;
+              -moz-transform-origin: top left;
+              -webkit-transform-origin: top left;
+              -o-transform-origin: top left;
+              width: 300px;
+              top: 300px;
+              top: 0px\9;
+              position: relative;
+              color: #ffffff;
+              background-color: #7B0099;
+              -moz-transform: rotate(-90deg);
+              -webkit-transform: rotate(-90deg);
+              -o-transform: rotate(-90deg);
+              filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+              font-size: 15px;
+              font-weight: bold;
+              text-align: right;
+              display: block;
+              letter-spacing: 3px;
+              font-size: 20px;
+            }
+            #accordion-h {
+              position: relative;
+              border: 1px solid black;
+              height: 300px;
+              padding: 0;
+              margin: 0;
+            }
+            .pane {
+              position: absolute;
+              height: 300px;
+              width: 100%;
+              margin: 0;
+              padding: 0;
+              background-color: #ffffff;
+            }
+            .pane-handle {
+              cursor: pointer;
+              background-color: #7B0099;
+              float: left;
+              height: 300px;
+              width: 25px;
+              text-decoration: none;
+              position: relative;
+            }
+            ul#accordion-h {
+              padding: 0;
+              overflow: hidden;
+              list-style-type: none;
+            }
+            ul#accordion-h {
+              position: relative;
+              top: 0;
+              left: 0;
+            }
+            #pane-1 {
+              z-index: 1;
+            }
+            #pane-2 {
+              z-index: 2;
+              margin-left: 20px;
+            }
+            #pane-3 {
+              z-index: 3;
+              margin-left: 40px;
+            }
+            #pane-4 {
+              z-index: 4;
+              margin-left: 60px;
+            }
+            #pane-5 {
+              z-index: 5;
+              margin-left: 80px;
+            }
+            #pane-6 {
+              z-index: 6;
+              margin-left: 100px;
+            }                  
+        </style>
+        <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.6/dojo/dojo.xd.js"
+        djConfig="parseOnLoad: true">
+        </script>        
+        <ul id="accordion-h">
+          <li id="pane-1" class="pane">
+            <a class="pane-handle">
+              <h4 class="pane-hook">Pane 1</h4>
+            </a>
+            <p>I am content from pane 1</p>
+          </li>    
+          <li id="pane-2" class="pane active">
+            <a class="pane-handle">
+              <h4 class="pane-hook">Pane 2</h4>
+            </a>
+            <p>I am content from pane 2</p>
+          </li>  
+          <li id="pane-3" class="pane">
+            <a class="pane-handle">
+              <h4 class="pane-hook">Pane 3</h4>
+            </a>
+            <p>I am content from pane 3</p>
+          </li>
+          <li id="pane-4" class="pane">
+            <a class="pane-handle">
+              <h4 class="pane-hook">Pane 4</h4>
+            </a>
+            <p>I am content from pane 4</p>
+          </li>      
+        </ul>
+        <script>
+          dojo.require("dojo.fx");
+          var AccordionH = function() {
+            var _panes = [];
+            var _paneHandleWidth = 0;
+            var _containerWidth = 0;
+            var _containerId = 'accordion-h';
+            var _activeIdx = 0;
+            var loadPanes = function() {
+              _panes = dojo.query('li.pane');
+              _paneHandleWidth = parseInt(_panes[0].children[0].children[0].offsetHeight);
+              _containerWidth = _panes[0].parentNode.offsetWidth;
+              var selectedIdx = getActiveIdx();
+              for (var idx in _panes) {
+                var currentPane = _panes[idx];
+                if (idx > selectedIdx) {
+                  //currentPane.style.left = ((_containerWidth - ((_panes.length - idx) * _paneHandleWidth)) - dojo.style(currentPane, "marginLeft")) + 'px';
+                  dojo.style(currentPane, "left", ((_containerWidth - ((_panes.length - idx) * _paneHandleWidth)) - dojo.style(currentPane, "marginLeft")) + 'px');
+                }                
+              }
+            };
+
+            var getActiveIdx = function() {
+              var activeLi = dojo.query('li.active', _containerId);
+              return activeLi[0].id.split('-')[1] - 1;
+            };
+            var setActiveIdx = function(idx) {
+              _activeIdx = idx;
+              dojo.removeClass(dojo.query('li.active', _containerId)[0], 'active');
+              dojo.addClass(dojo.byId('pane-' + (idx + 1)), 'active');
+            };
+            var handlePaneClick = function(e) {
+              if (dojo.hasClass(e.target, "pane-hook")) {
+                var activeIdx = getActiveIdx();
+                var clickedIdx = e.target.parentNode.parentNode.id.split('-')[1] - 1;
+                if (clickedIdx > activeIdx) {
+                  var aAnim = [];
+                  for (var idx = activeIdx + 1; idx < clickedIdx + 1; idx++) {
+                    var paneId = 'pane-' + (idx + 1);
+                    var paneNode = dojo.byId(paneId);
+                    aAnim.push(dojo.fx.slideTo({
+                      node: paneNode,
+                      left: 0
+                    }));
+                  };
+                  var anim = dojo.fx.combine(aAnim);
+                  anim.play();
+                }
+                else if (clickedIdx < activeIdx) {
+                  var aAnim = [];
+                  for (var idx = clickedIdx + 2; idx < _panes.length + 1; idx++) {                                                  
+                    var paneId = 'pane-' + idx;
+                    var paneNode = dojo.byId(paneId);
+                    var targetLeft = (_containerWidth - ((_panes.length - idx + 1) * _paneHandleWidth)) - dojo.style(paneNode, "marginLeft");
+                    console.log(paneNode.style.marginLeft);
+                    aAnim.push(dojo.fx.slideTo({
+                      node: paneNode,
+                      left: targetLeft
+                    }));
+                  }
+                  var anim = dojo.fx.combine(aAnim);
+                  anim.play();
+                }
+                setActiveIdx(clickedIdx);
+              }          
+            };  
+            return {
+              init: function() {
+                loadPanes();
+                dojo.connect(dojo.byId('accordion-h'), 'onclick', handlePaneClick);
+                dojo.connect(window, 'onresize', loadPanes);
+                alert('shit browser');
+              },
+
+              // temporary public access
+              panes: _panes
+            };            
+          }();
+        </script>
+        <script type="text/javascript">
+            dojo.addOnLoad(function() {
+                AccordionH.init();
+            });
+        </script>
+    </body>
+
+</html>
