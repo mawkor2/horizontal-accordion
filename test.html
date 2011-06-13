@@ -167,7 +167,6 @@
                     var paneId = 'pane-' + idx;
                     var paneNode = dojo.byId(paneId);
                     var targetLeft = (_containerWidth - ((_panes.length - idx + 1) * _paneHandleWidth)) - dojo.style(paneNode, "marginLeft");
-                    console.log(paneNode.style.marginLeft);
                     aAnim.push(dojo.fx.slideTo({
                       node: paneNode,
                       left: targetLeft
@@ -184,7 +183,6 @@
                 loadPanes();
                 dojo.connect(dojo.byId('accordion-h'), 'onclick', handlePaneClick);
                 dojo.connect(window, 'onresize', loadPanes);
-                alert('shit browser');
               },
 
               // temporary public access
