@@ -4,6 +4,14 @@
     <head>
         <style type="text/css">
             body, html { font-family:helvetica,arial,sans-serif; font-size:90%; }
+            .left-radius {
+               border-radius: 9px 0 0 9px;
+               -moz-border-radius: 9px 0 0 9px;
+            } 
+            .right-radius {
+               border-radius: 0 9px 9px 0;
+               -moz-border-radius: 0 9px 9px 0;
+            }
             #accordion-h h4 {
               margin: 0;
               -moz-transform-origin: top left;
@@ -11,10 +19,8 @@
               -o-transform-origin: top left;
               width: 300px;
               top: 300px;
-              top: 0px\9;
               position: relative;
               color: #ffffff;
-              background-color: #7B0099;
               -moz-transform: rotate(-90deg);
               -webkit-transform: rotate(-90deg);
               -o-transform: rotate(-90deg);
@@ -84,8 +90,7 @@
               margin-left: 100px;
             }                  
         </style>
-        <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.6/dojo/dojo.xd.js"
-        djConfig="parseOnLoad: true">
+        <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.6/dojo/dojo.xd.js">
         </script>        
         <ul id="accordion-h">
           <li id="pane-1" class="pane">
@@ -126,18 +131,26 @@
               _paneHandleWidth = parseInt(_panes[0].children[0].children[0].offsetHeight);
               _containerWidth = _panes[0].parentNode.offsetWidth;
               var selectedIdx = getActiveIdx();
-              for (var idx in _panes) {
+              for (var idx = 0; idx < _panes.length; idx++) {
                 var currentPane = _panes[idx];
+                if (idx === selectedIdx) {
+                  dojo.addClass(currentPane.children[0], "right-radius");
+                };
                 if (idx > selectedIdx) {
-                  //currentPane.style.left = ((_containerWidth - ((_panes.length - idx) * _paneHandleWidth)) - dojo.style(currentPane, "marginLeft")) + 'px';
+                  if (idx - 1 === selectedIdx) {
+                    dojo.addClass(currentPane.children[0], "left-radius");
+                  }
                   dojo.style(currentPane, "left", ((_containerWidth - ((_panes.length - idx) * _paneHandleWidth)) - dojo.style(currentPane, "marginLeft")) + 'px');
-                }                
-              }
+                };  
+              };
             };
 
             var getActiveIdx = function() {
               var activeLi = dojo.query('li.active', _containerId);
               return activeLi[0].id.split('-')[1] - 1;
+            };
+            var getPane = function(idx) {
+              return dojo.byId('pane-' + (idx + 1));
             };
             var setActiveIdx = function(idx) {
               _activeIdx = idx;
@@ -148,11 +161,21 @@
               if (dojo.hasClass(e.target, "pane-hook")) {
                 var activeIdx = getActiveIdx();
                 var clickedIdx = e.target.parentNode.parentNode.id.split('-')[1] - 1;
-                if (clickedIdx > activeIdx) {
+                if (clickedIdx === activeIdx) {
+                  return;
+                };
+                dojo.removeClass(getPane(activeIdx).children[0], "right-radius");
+                if (getPane(activeIdx + 1)) {
+                  dojo.removeClass(getPane(activeIdx + 1).children[0], "left-radius");
+                }
+                dojo.addClass(getPane(clickedIdx).children[0], "right-radius");
+                if (clickedIdx !== _panes.length - 1) {
+                  dojo.addClass(getPane(clickedIdx + 1).children[0], "left-radius");
+                }
+                if (clickedIdx > activeIdx) {              
                   var aAnim = [];
-                  for (var idx = activeIdx + 1; idx < clickedIdx + 1; idx++) {
-                    var paneId = 'pane-' + (idx + 1);
-                    var paneNode = dojo.byId(paneId);
+                  for (var idx = activeIdx + 1; idx <= clickedIdx; idx++) {
+                    var paneNode = getPane(idx);
                     aAnim.push(dojo.fx.slideTo({
                       node: paneNode,
                       left: 0
